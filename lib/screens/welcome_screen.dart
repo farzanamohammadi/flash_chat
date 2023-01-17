@@ -1,3 +1,4 @@
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flash_chat_starting_project/screens/login_screen.dart';
 import 'package:flash_chat_starting_project/screens/registration_screen.dart';
 
@@ -22,20 +23,23 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       vsync: this,
       duration: const Duration(seconds: 1),
     );
-    animation =ColorTween(begin: Colors.yellow.shade800,end: kBackgroundColor).animate(controller);
+    animation = ColorTween(begin: Colors.yellow.shade800, end: kBackgroundColor)
+        .animate(controller);
     controller.forward();
-   
+
     controller.addListener(() {
       print(animation.value);
       setState(() {});
     });
   }
-@override
+
+  @override
   void dispose() {
     // TODO: implement dispose
-  controller.dispose();
+    controller.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,14 +59,15 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     child: Image.asset('images/logo.png'),
                   ),
                 ),
-                Text(
-                  'Flash Chat',
+                DefaultTextStyle(
                   style: const TextStyle(
-                    fontSize: 45.0,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                  ),
-                ),
+                      fontSize: 45.0,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white),
+                  child: AnimatedTextKit(
+                    totalRepeatCount: 2,
+                      animatedTexts: [TypewriterAnimatedText('Flash Chat')]),
+                )
               ],
             ),
             const SizedBox(
