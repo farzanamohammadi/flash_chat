@@ -1,4 +1,4 @@
-#Tue Jan 10 18:53:11 AFT 2023
+#Thu Jan 26 18:10:19 AFT 2023
 base.0=C\:\\Users\\dell\\StudioProjects\\flash_chat_starting_project\\build\\app\\intermediates\\dex\\debug\\mergeDexDebug\\classes.dex
 renamed.0=classes.dex
 path.0=classes.dex
