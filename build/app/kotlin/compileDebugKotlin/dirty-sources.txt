@@ -1,1 +1,0 @@
-C:\Users\dell\StudioProjects\flash_chat_starting_project\android\app\src\main\kotlin\com\example\flash_chat_starting_project\MainActivity.kt
