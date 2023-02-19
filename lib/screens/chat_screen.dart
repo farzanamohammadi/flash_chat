@@ -5,14 +5,28 @@ import 'package:flutter/material.dart';
 import 'package:flash_chat_starting_project/constants.dart';
 
 class ChatScreen extends StatefulWidget {
-static const String id="chat_screen";
+  static const String id = "chat_screen";
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  final _firestore=FirebaseFirestore.instance;
-  TextEditingController _messageTextController=TextEditingController();
+  final _firestore = FirebaseFirestore.instance;
+  TextEditingController _messageTextController = TextEditingController();
+  // void getMessages() async {
+  //   var messages = await _firestore.collection('messages').get();
+  //   for(var message in messages.docs){
+  //     print(message.data());
+  //   }
+  // }
+  void messageStream(){
+    //Streams
+    _firestore.collection('messages').snapshots().listen((event) {
+      for(var message in event.docs){
+          print(message.data());
+          }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,8 +39,9 @@ class _ChatScreenState extends State<ChatScreen> {
           IconButton(
               icon: const Icon(Icons.logout),
               onPressed: () {
-                Navigator.pop(context);
-                AuthService().signOut();
+                // Navigator.pop(context);
+                // AuthService().signOut();
+                messageStream();
               }),
         ],
         title: const Text('⚡ ️Chat'),
@@ -49,11 +64,11 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                   TextButton(
                     onPressed: () {
-                    _firestore.collection('messages').add({
-                      'date': DateTime.now().microsecondsSinceEpoch,
-                      'text':_messageTextController.text,
-                      'sender':AuthService().getCurrentUser!.email,
-                    });
+                      _firestore.collection('messages').add({
+                        'date': DateTime.now().microsecondsSinceEpoch,
+                        'text': _messageTextController.text,
+                        'sender': AuthService().getCurrentUser!.email,
+                      });
                     },
                     child: const Icon(Icons.send,
                         size: 30, color: kSendButtonColor),
