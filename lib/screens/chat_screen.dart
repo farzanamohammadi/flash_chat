@@ -1,8 +1,12 @@
+import 'dart:html';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flash_chat_starting_project/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flash_chat_starting_project/constants.dart';
+
+import '../components/messageBubble.dart';
 
 class ChatScreen extends StatefulWidget {
   static const String id = "chat_screen";
@@ -51,33 +55,7 @@ class _ChatScreenState extends State<ChatScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            StreamBuilder<QuerySnapshot>(
-              stream: _firestore.collection('messages').snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Expanded(
-                    child: CircularProgressIndicator(
-                      backgroundColor: Colors.blue,
-                    ),
-                  );
-                }
-                if (snapshot.hasData) {
-                  var messages = snapshot.data!.docs;
-                  List<Text> messageWidgets = [];
-                  for (var message in messages) {
-                    var messageText = message.get('text');
-                    var sender = message.get('sender');
-                    Text messageWidget = Text('$messageText from $sender');
-                    messageWidgets.add(messageWidget);
-                  }
-                  return Column(children: messageWidgets);
-                } else {
-                  return Center(
-                    child: Text('snapshot has nodata'),
-                  );
-                }
-              },
-            ),
+            MessageStream(firestore: _firestore),
             Container(
               decoration: kMessageContainerDecoration,
               child: Row(
@@ -96,6 +74,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         'text': _messageTextController.text,
                         'sender': AuthService().getCurrentUser!.email,
                       });
+                      _messageTextController.clear();
                     },
                     child: const Icon(Icons.send,
                         size: 30, color: kSendButtonColor),
@@ -109,3 +88,50 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 }
+
+class MessageStream extends StatelessWidget {
+  const MessageStream({
+    Key? key,
+    required FirebaseFirestore firestore,
+  }) : _firestore = firestore, super(key: key);
+
+  final FirebaseFirestore _firestore;
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: _firestore.collection('messages').snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Expanded(
+            child: CircularProgressIndicator(
+              backgroundColor: Colors.blue,
+            ),
+          );
+        }
+        if (snapshot.hasData) {
+          var messages = snapshot.data!.docs;
+          List<Widget> messageBubbles = [];
+          for (var message in messages) {
+            var messageText = message.get('text');
+            var sender = message.get('sender');
+            Widget messageBubble = MessageBubble(
+              message: messageText,
+              sender: sender,
+            );
+            messageBubbles.add(messageBubble);
+          }
+          return Expanded(
+            child: ListView(children: messageBubbles),
+          );
+        } else {
+          return Center(
+            child: Text('snapshot has nodata'),
+          );
+        }
+      },
+    );
+  }
+}
+
+
