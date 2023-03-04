@@ -17,20 +17,7 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final _firestore = FirebaseFirestore.instance;
   TextEditingController _messageTextController = TextEditingController();
-  // void getMessages() async {
-  //   var messages = await _firestore.collection('messages').get();
-  //   for(var message in messages.docs){
-  //     print(message.data());
-  //   }
-  // }
-  void messageStream() {
-    //Streams
-    _firestore.collection('messages').snapshots().listen((event) {
-      for (var message in event.docs) {
-        print(message.data());
-      }
-    });
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -43,9 +30,11 @@ class _ChatScreenState extends State<ChatScreen> {
           IconButton(
               icon: const Icon(Icons.logout),
               onPressed: () {
-                // Navigator.pop(context);
-                // AuthService().signOut();
-                messageStream();
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                }
+                AuthService().signOut();
+                // messageStream();
               }),
         ],
         title: const Text('⚡ ️Chat'),
@@ -93,14 +82,15 @@ class MessageStream extends StatelessWidget {
   const MessageStream({
     Key? key,
     required FirebaseFirestore firestore,
-  }) : _firestore = firestore, super(key: key);
+  })  : _firestore = firestore,
+        super(key: key);
 
   final FirebaseFirestore _firestore;
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: _firestore.collection('messages').snapshots(),
+      stream: _firestore.collection('messages').orderBy('date',descending: true).snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Expanded(
@@ -116,13 +106,15 @@ class MessageStream extends StatelessWidget {
             var messageText = message.get('text');
             var sender = message.get('sender');
             Widget messageBubble = MessageBubble(
-              message: messageText,
-              sender: sender,
-            );
+                message: messageText,
+                sender: sender,
+                isMe: AuthService().getCurrentUser!.email == sender);
             messageBubbles.add(messageBubble);
           }
           return Expanded(
-            child: ListView(children: messageBubbles),
+            child: ListView(
+              reverse: true,
+                children: messageBubbles),
           );
         } else {
           return Center(
@@ -133,5 +125,3 @@ class MessageStream extends StatelessWidget {
     );
   }
 }
-
-
